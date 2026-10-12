@@ -175,3 +175,56 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const body = await request.json();
+    const id = Number(body.id);
+
+    if (!Number.isInteger(id) || id < 1) {
+      return NextResponse.json(
+        { message: "A valid reservation ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const reservation = await prisma.reservation.findUnique({
+      where: { id },
+    });
+
+    if (!reservation) {
+      return NextResponse.json(
+        { message: "Reservation not found" },
+        { status: 404 }
+      );
+    }
+
+    if (reservation.status === "CANCELLED") {
+      return NextResponse.json(
+        { message: "This reservation is already cancelled" },
+        { status: 409 }
+      );
+    }
+
+    const updatedReservation = await prisma.reservation.update({
+      where: { id },
+      data: { status: "CANCELLED" },
+      include: {
+        user: true,
+        resource: true,
+      },
+    });
+
+    return NextResponse.json({
+      message: "Reservation cancelled successfully",
+      reservation: updatedReservation,
+    });
+  } catch (error) {
+    console.error("Failed to cancel reservation:", error);
+
+    return NextResponse.json(
+      { message: "Failed to cancel reservation" },
+      { status: 500 }
+    );
+  }
+}
