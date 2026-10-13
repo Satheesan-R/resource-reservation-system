@@ -43,6 +43,10 @@ export default function ReservationsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+
+
   async function loadData() {
     try {
       const [resourceResponse, reservationResponse] =
@@ -177,6 +181,21 @@ export default function ReservationsPage() {
   const availableResources = resources.filter(
     (resource) => resource.status === "AVAILABLE"
   );
+
+  const filteredReservations = reservations.filter((reservation) => {
+    const query = searchTerm.trim().toLowerCase();
+
+    const matchesSearch =
+      reservation.resource.name.toLowerCase().includes(query) ||
+      reservation.user.name.toLowerCase().includes(query) ||
+      reservation.user.email.toLowerCase().includes(query);
+
+    const matchesStatus =
+      statusFilter === "ALL" ||
+      reservation.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-10 text-gray-900">
@@ -331,19 +350,58 @@ export default function ReservationsPage() {
         </section>
 
         <section className="mt-8">
-          <h2 className="text-xl font-semibold">
-            All Reservations ({reservations.length})
-          </h2>
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold">
+              Reservations ({filteredReservations.length})
+            </h2>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSearchTerm("");
+                setStatusFilter("ALL");
+              }}
+              className="text-sm font-medium text-blue-600 hover:underline"
+            >
+              Clear filters
+            </button>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <input
+              type="search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search resource, name, or email..."
+              className="w-full rounded-lg border bg-white p-3"
+              aria-label="Search reservations"
+            />
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full rounded-lg border bg-white p-3"
+              aria-label="Filter by reservation status"
+            >
+              <option value="ALL">All statuses</option>
+              <option value="CONFIRMED">Confirmed</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+          </div>
+
 
           {loading ? (
-            <p className="mt-4 text-gray-600">Loading reservations...</p>
-          ) : reservations.length === 0 ? (
+            <p className="mt-4 text-gray-600">
+              Loading reservations...
+            </p>
+          ) : filteredReservations.length === 0 ? (
             <p className="mt-4 rounded-xl border bg-white p-6 text-gray-600">
-              No reservations have been created yet.
+              No reservations match your search or filter.
             </p>
           ) : (
             <div className="mt-4 space-y-4">
-              {reservations.map((reservation) => (
+              {filteredReservations.map((reservation) => (
                 <article
                   key={reservation.id}
                   className="rounded-xl border bg-white p-5 shadow-sm"
@@ -383,12 +441,10 @@ export default function ReservationsPage() {
 
                   <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
                     <p>
-                      <strong>Reserved by:</strong>{" "}
-                      {reservation.user.name}
+                      <strong>Reserved by:</strong> {reservation.user.name}
                     </p>
                     <p>
-                      <strong>Email:</strong>{" "}
-                      {reservation.user.email}
+                      <strong>Email:</strong> {reservation.user.email}
                     </p>
                     <p>
                       <strong>Starts:</strong>{" "}
@@ -407,7 +463,6 @@ export default function ReservationsPage() {
                       {reservation.purpose || "Not specified"}
                     </p>
                   </div>
-
                 </article>
               ))}
             </div>
