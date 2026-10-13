@@ -83,3 +83,63 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const body = await request.json();
+    const id = Number(body.id);
+    const status = body.status;
+    const validStatuses = [
+      "AVAILABLE",
+      "UNAVAILABLE",
+      "MAINTENANCE",
+    ];
+
+    if (!Number.isInteger(id) || id < 1) {
+      return NextResponse.json(
+        { message: "A valid resource ID is required" },
+        { status: 400 }
+      );
+    }
+
+    if (
+      typeof status !== "string" ||
+      !validStatuses.includes(status)
+    ) {
+      return NextResponse.json(
+        { message: "Invalid resource status" },
+        { status: 400 }
+      );
+    }
+
+    const existingResource = await prisma.resource.findUnique({
+      where: { id },
+    });
+
+    if (!existingResource) {
+      return NextResponse.json(
+        { message: "Resource not found" },
+        { status: 404 }
+      );
+    }
+
+    const updatedResource = await prisma.resource.update({
+      where: { id },
+      data: {
+        status: status as
+          | "AVAILABLE"
+          | "UNAVAILABLE"
+          | "MAINTENANCE",
+      },
+    });
+
+    return NextResponse.json(updatedResource);
+  } catch (error) {
+    console.error("Failed to update resource:", error);
+
+    return NextResponse.json(
+      { message: "Failed to update resource" },
+      { status: 500 }
+    );
+  }
+}

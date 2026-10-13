@@ -92,6 +92,38 @@ export default function ResourcesPage() {
     }
   }
 
+  async function handleStatusChange(
+    id: number,
+    status: Resource["status"]
+  ) {
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/resources", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id, status }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to update status");
+      }
+
+      setMessage("Resource status updated successfully!");
+      await loadResources();
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong"
+      );
+    }
+  }
+
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-10 text-gray-900">
       <div className="mx-auto max-w-5xl">
@@ -215,9 +247,21 @@ export default function ResourcesPage() {
                       {resource.name}
                     </h3>
 
-                    <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
-                      {resource.status}
-                    </span>
+                    <select
+                      value={resource.status}
+                      onChange={(e) =>
+                        handleStatusChange(
+                          resource.id,
+                          e.target.value as Resource["status"]
+                        )
+                      }
+                      aria-label={`Change status of ${resource.name}`}
+                      className="rounded-lg border bg-white px-3 py-2 text-sm"
+                    >
+                      <option value="AVAILABLE">Available</option>
+                      <option value="UNAVAILABLE">Unavailable</option>
+                      <option value="MAINTENANCE">Maintenance</option>
+                    </select>
                   </div>
 
                   <p className="mt-3 text-sm text-gray-600">
