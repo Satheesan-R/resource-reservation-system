@@ -2,6 +2,10 @@
 
 A full-stack web application for managing shared resources and reservations. Users can view available resources, create reservations, prevent overlapping bookings, and cancel existing reservations.
 
+## Live Demo
+
+[Open the deployed application](https://resource-reservation-system-nu.vercel.app/)
+
 ## Features
 
 - Dashboard with resource and reservation statistics
@@ -33,7 +37,7 @@ A full-stack web application for managing shared resources and reservations. Use
 1. Clone the repository:
 
    ```bash
-   git clone YOUR_GITHUB_REPOSITORY_URL
+   git clone https://github.com/Satheesan-R/resource-reservation-system.git
    cd resource-reservation-system
    ```
 
@@ -46,10 +50,11 @@ A full-stack web application for managing shared resources and reservations. Use
 3. Create a `.env` file in the project root and configure your PostgreSQL connection:
 
    ```env
-   DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/resource_reservation_db?schema=public"
+   DATABASE_URL="postgresql://neondb_owner:YOUR_PASSWORD@ep-green-leaf-b39cicl1-pooler.c-4.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
    ```
 
-   Replace `YOUR_PASSWORD` with your local PostgreSQL password.
+   Replace `YOUR_PASSWORD` with your database password. Do not commit this
+   value or your `.env` file to GitHub.
 
 4. Apply database migrations and generate the Prisma client:
 
