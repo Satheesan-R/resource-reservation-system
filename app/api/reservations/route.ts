@@ -36,6 +36,11 @@ export async function POST(request: Request) {
         ? body.email.trim().toLowerCase()
         : "";
 
+    const department =
+      typeof body.department === "string"
+        ? body.department
+        : "";
+
     const resourceId = Number(body.resourceId);
     const startTime = new Date(body.startTime);
     const endTime = new Date(body.endTime);
@@ -45,16 +50,40 @@ export async function POST(request: Request) {
         ? body.purpose.trim()
         : "";
 
-    if (!name || !email || !body.startTime || !body.endTime) {
+    if (
+      !name ||
+      !email ||
+      !department ||
+      !body.startTime ||
+      !body.endTime
+    ) {
       return NextResponse.json(
-        { message: "Name, email, start time and end time are required" },
+        {
+          message:
+            "Name, company email, department, start time and end time are required",
+        },
         { status: 400 }
       );
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!/^[^\s@]+@[^\s@]+\.com$/.test(email)) {
       return NextResponse.json(
-        { message: "Please provide a valid email address" },
+        { message: "Please provide a valid company .com email address" },
+        { status: 400 }
+      );
+    }
+
+    const validDepartments = [
+      "HUMAN_RESOURCES",
+      "IT",
+      "SALES_AND_MARKETING",
+      "FINANCE_AND_ACCOUNTING",
+      "OPERATIONS",
+    ];
+
+    if (!validDepartments.includes(department)) {
+      return NextResponse.json(
+        { message: "Please select a valid department" },
         { status: 400 }
       );
     }
@@ -109,8 +138,25 @@ export async function POST(request: Request) {
         // Otherwise, create a new user.
         const user = await tx.user.upsert({
           where: { email },
-          update: { name },
-          create: { name, email },
+          update: {
+            name,
+            department: department as
+              | "HUMAN_RESOURCES"
+              | "IT"
+              | "SALES_AND_MARKETING"
+              | "FINANCE_AND_ACCOUNTING"
+              | "OPERATIONS",
+          },
+          create: {
+            name,
+            email,
+            department: department as
+              | "HUMAN_RESOURCES"
+              | "IT"
+              | "SALES_AND_MARKETING"
+              | "FINANCE_AND_ACCOUNTING"
+              | "OPERATIONS",
+          },
         });
 
         return tx.reservation.create({

@@ -24,10 +24,19 @@ enum ReservationStatus {
   CANCELLED
 }
 
+enum Department {
+  HUMAN_RESOURCES
+  IT
+  SALES_AND_MARKETING
+  FINANCE_AND_ACCOUNTING
+  OPERATIONS
+}
+
 model User {
   id           Int           @id @default(autoincrement())
   name         String
   email        String        @unique
+  department   Department    @default(OPERATIONS)
   reservations Reservation[]
   createdAt    DateTime      @default(now())
 }

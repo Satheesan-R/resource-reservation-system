@@ -20,6 +20,12 @@ type Reservation = {
   user: {
     name: string;
     email: string;
+    department:
+      | "HUMAN_RESOURCES"
+      | "IT"
+      | "SALES_AND_MARKETING"
+      | "FINANCE_AND_ACCOUNTING"
+      | "OPERATIONS";
   };
   resource: {
     name: string;
@@ -33,6 +39,7 @@ export default function ReservationsPage() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [department, setDepartment] = useState("");
   const [resourceId, setResourceId] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -104,6 +111,7 @@ export default function ReservationsPage() {
         body: JSON.stringify({
           name,
           email,
+          department,
           resourceId: Number(resourceId),
           startTime: new Date(startTime).toISOString(),
           endTime: new Date(endTime).toISOString(),
@@ -122,6 +130,7 @@ export default function ReservationsPage() {
 
       setName("");
       setEmail("");
+      setDepartment("");
       setResourceId("");
       setStartTime("");
       setEndTime("");
@@ -246,9 +255,34 @@ export default function ReservationsPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder="you@company.com"
                 className="w-full rounded-lg border p-3"
               />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-sm font-medium">
+                Department *
+              </label>
+              <select
+                required
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                className="w-full rounded-lg border bg-white p-3"
+              >
+                <option value="">Choose a department</option>
+                <option value="HUMAN_RESOURCES">
+                  Human Resources (HR)
+                </option>
+                <option value="IT">IT Department</option>
+                <option value="SALES_AND_MARKETING">
+                  Sales and Marketing
+                </option>
+                <option value="FINANCE_AND_ACCOUNTING">
+                  Finance and Accounting
+                </option>
+                <option value="OPERATIONS">Operations</option>
+              </select>
             </div>
 
             <div className="sm:col-span-2">
@@ -445,6 +479,20 @@ export default function ReservationsPage() {
                     </p>
                     <p>
                       <strong>Email:</strong> {reservation.user.email}
+                    </p>
+                    <p>
+                      <strong>Department:</strong>{" "}
+                      {reservation.user.department === "HUMAN_RESOURCES"
+                        ? "Human Resources (HR)"
+                        : reservation.user.department === "IT"
+                          ? "IT Department"
+                          : reservation.user.department ===
+                              "SALES_AND_MARKETING"
+                            ? "Sales and Marketing"
+                            : reservation.user.department ===
+                                "FINANCE_AND_ACCOUNTING"
+                              ? "Finance and Accounting"
+                              : "Operations"}
                     </p>
                     <p>
                       <strong>Starts:</strong>{" "}
